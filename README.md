@@ -1,8 +1,7 @@
 MEMDB ika (meowDB)
 ======
 
-[![Build Status](https://travis-ci.org/flatiron/cradle.svg?branch=master)](https://travis-ci.org/flatiron/cradle)
-[![Dependency Status](https://david-dm.org/flatiron/cradle.svg)](https://david-dm.org/flatiron/cradle)
+[![Build Status](https://travis-ci.org/evanxg852000/memdb.svg)](https://travis-ci.org/evanxg852000/memdb)
 
 A simple, fast and pure Javascript key-value in memory database for Node JS.
 
@@ -123,7 +122,7 @@ keychain is a concatenation of multiple object keys to obtain a path for acessin
 Testing
 -------
 
-After cloning the repo and installing all dependencies (using `npm install`) you can run all tests using [mocha](http://vowsjs.org):
+After cloning the repo and installing all dependencies (using `npm install`) you can run all tests using [mocha](https://mochajs.org):
 
 ```
 $ npm test
