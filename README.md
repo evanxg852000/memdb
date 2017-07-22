@@ -32,7 +32,7 @@ Synopsis
 
 ```
 
-installation
+Installation
 ------------
 
 ``` bash
@@ -71,11 +71,12 @@ keychain is a concatenation of multiple object keys to obtain a path for acessin
 ### Saving data ###
 
 `put(keychain, value, loose)`
-| Parameters   |      Description                                                           |
-|--------------|----------------------------------------------------------------------------|
-| keychain     | Path where the data should be stored                                       |
-| value        | The value to be stored                                                     |
-| loose        | Will create internal object of the chain if non existant, default to false |
+
+| Parameters | Description |
+|--------------|--------------|
+| keychain| Path where the data should be stored |
+| value | The value to be stored |
+| loose | Will create internal object of the chain if non existant, default to false |
  
 ``` js
   db.put('server.dev.host', 'https://dev.alex.com', true).then((status) => {
@@ -86,10 +87,11 @@ keychain is a concatenation of multiple object keys to obtain a path for acessin
 ### Retrieving data ###
 
 `get(keychain, defaultValue)`
-| Parameters   |      Description                                                           |
-|--------------|----------------------------------------------------------------------------|
-| keychain     | Path where the data should be retrieved                                    |
-| defaultValue | The default value to be returned if not found                              |
+
+| Parameters | Description |
+|--------------|--------------|
+| keychain | Path where the data should be retrieved |
+| defaultValue | The default value to be returned if not found |
  
 ``` js
   db.get('server.dev.host', 'https://dev.alex.com').then((rsp) => {
@@ -107,9 +109,10 @@ keychain is a concatenation of multiple object keys to obtain a path for acessin
 ### Deleting data ###
 
 `delete(keychain)`
-| Parameters   |      Description                                                           |
-|--------------|----------------------------------------------------------------------------|
-| keychain     | Path where the data should be deleted                                      |
+
+| Parameters | Description |
+|-------------|-------------|
+| keychain | Path where the data should be deleted |
 
 ``` js
   db.delete('server.dev.host').then((rsp) => {
