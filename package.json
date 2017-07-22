@@ -1,0 +1,25 @@
+{
+  "name": "memdb",
+  "version": "0.0.1",
+  "description": "An in-memory database for nodejs",
+  "main": "src/index.js",
+  "scripts": {
+    "lint": "standard",
+    "lint-fix": "standard --fix",
+    "test": "standard && mocha"
+  },
+  "standard": {
+    "ignore": [ ]
+  },
+  "keywords": [
+    "db",
+    "in-memory",
+    "nosql"
+  ],
+  "author": "Evance Soumaoro",
+  "license": "ISC",
+  "devDependencies": {
+    "mocha": "^3.4.2",
+    "standard": "^10.0.2"
+  }
+}
