@@ -144,14 +144,13 @@ const memdb = function (dbName, opts) {
   }
 
   this.put = function (key, value, loose) {
-    var self = this
     return new Promise(function (resolve, reject) {
-      const path = self._extract(key)
+      const path = this._extract(key)
       if (path === false) {
         return reject(new DbError('BAD_KEY_FORMAT', 'Invalid key specified!'))
       }
 
-      var obj = self._db
+      var obj = this._db
       const result = !path.some(function (key, idx) {
         if (!obj[key] && path.length !== 1) {
           if (!loose) {
@@ -168,24 +167,23 @@ const memdb = function (dbName, opts) {
         return reject(new DbError('KEY_NOT_FOUND', 'The specified key was not found!'))
       }
 
-      self._log.push({
+      this._log.push({
         _time: Math.floor(Date.now()),
         _action: INSERT_LOG_ACTION,
         _payload: {key: key, value: value, loose: loose}
       })
-      if (self._log.length >= self._opts.stagingSize) {
-        self._flush()
+      if (this._log.length >= this._opts.stagingSize) {
+        this._flush()
       } else {
-        fs.writeFileSync(self._logFile, self._encrypt(self._log), 'utf-8')
+        fs.writeFileSync(this._logFile, this._encrypt(this._log), 'utf-8')
       }
       resolve(true)
-    })
+    }.bind(this))
   }
 
   this.get = function (key, defaultValue) {
-    var self = this
     return new Promise(function (resolve, reject) {
-      const path = self._extract(key)
+      const path = this._extract(key)
       if (path === false) {
         return reject(new DbError('BAD_KEY_FORMAT', 'Invalid key specified!'))
       }
@@ -196,7 +194,7 @@ const memdb = function (dbName, opts) {
           return new DbError('KEY_NOT_FOUND', 'A value for the specified key was not found!')
         }
         return obj
-      }, self._db)
+      }, this._db)
 
       if (result.type === 'KEY_NOT_FOUND') {
         if (!defaultValue) {
@@ -205,18 +203,17 @@ const memdb = function (dbName, opts) {
         return resolve(defaultValue)
       }
       resolve(result)
-    })
+    }.bind(this))
   }
 
   this.delete = function (key) {
-    var self = this
     return new Promise(function (resolve, reject) {
-      const path = self._extract(key)
+      const path = this._extract(key)
       if (path === false) {
         return reject(new DbError('BAD_KEY_FORMAT', 'Invalid key specified!'))
       }
 
-      var obj = self._db
+      var obj = this._db
       const value = !path.some(function (key, idx) {
         if (!obj[key]) {
           return true
@@ -229,18 +226,18 @@ const memdb = function (dbName, opts) {
         return reject(new DbError('KEY_NOT_FOUND', 'The specified key was not found!'))
       }
 
-      self._log.push({
+      this._log.push({
         _time: Math.floor(Date.now()),
         _action: DELETE_LOG_ACTION,
         _payload: {key: key}
       })
-      if (self._log.length >= self._opts.stagingSize) {
-        self._flush()
+      if (this._log.length >= this._opts.stagingSize) {
+        this._flush()
       } else {
-        fs.writeFileSync(self._logFile, self._encrypt(self._log), 'utf-8')
+        fs.writeFileSync(this._logFile, this._encrypt(this._log), 'utf-8')
       }
       resolve(true)
-    })
+    }.bind(this))
   }
 
   this._boot()
