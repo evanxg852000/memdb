@@ -43,7 +43,9 @@ const memdb = function (dbName, opts) {
       try {
         this._db = this._decrypt(fs.readFileSync(this._dbFile, 'utf8'))
         this._log = this._decrypt(fs.readFileSync(this._logFile, 'utf8'))
-        this._replay()
+        if (!this._replay()) {
+          throw new DbError('DB_ERROR', 'Unable to replay database history!')
+        }
         this._flush()
       } catch (err) {
         throw new DbError('FILE_ERROR', 'Unable to read database files!', err)
@@ -59,8 +61,47 @@ const memdb = function (dbName, opts) {
     }
   }
 
-  // Replay log history on top of db ...
+  this._putFromLog = function (key, value, loose) {
+    const path = this._extract(key)
+    if (path === false) {
+      return false
+    }
+
+    var obj = this._db
+    return !path.some(function (key, idx) {
+      if (!obj[key] && idx !== path.length - 1) {
+        if (!loose) {
+          return true
+        } else {
+          obj[key] = {}
+        }
+      }
+      (idx < path.length - 1) ? obj = obj[key] : obj[key] = value
+      return false
+    })
+  }
+
+  this._deleteFromLog = function (key) {
+    const path = this._extract(key)
+    if (path === false) {
+      return false
+    }
+
+    var obj = this._db
+    return !path.some(function (key, idx) {
+      if (!obj[key]) {
+        return true
+      }
+      (idx < path.length - 1) ? obj = obj[key] : delete obj[key]
+      return false
+    })
+  }
+
   this._replay = function () {
+    if (this._log.length === 0) {
+      return true
+    }
+
     this._log.sort(function (l, r) {
       if (l._time < r._time) {
         return -1
@@ -71,17 +112,23 @@ const memdb = function (dbName, opts) {
       return 0
     })
 
-    this._log.reduce(function (promise, log) {
-      return promise.then(function () {
-        if (log._action === INSERT_LOG_ACTION) {
-          return this.put(log._payload.key, log._payload.value, log._payload.loose)
-        }
-        if (log._action === DELETE_LOG_ACTION) {
-          return this.delete(log._payload.key)
-        }
-        return Promise.resolve()
-      })
-    }, Promise.resolve())
+    var status = false
+    var log = null
+    const len = this._log.length
+    for (var i = 0; i < len; i++) {
+      log = this._log[i]
+      if (log._action === INSERT_LOG_ACTION) {
+        status = this._putFromLog(log._payload.key, log._payload.value, log._payload.loose)
+      }
+      if (log._action === DELETE_LOG_ACTION) {
+        status = this._deleteFromLog(log._payload.key)
+      }
+
+      if (!status) {
+        break
+      }
+    }
+    return status
   }
 
   this._flush = function () {
@@ -152,7 +199,7 @@ const memdb = function (dbName, opts) {
 
       var obj = this._db
       const result = !path.some(function (key, idx) {
-        if (!obj[key] && path.length !== 1) {
+        if (!obj[key] && idx !== path.length - 1) {
           if (!loose) {
             return true
           } else {
@@ -162,7 +209,6 @@ const memdb = function (dbName, opts) {
         (idx < path.length - 1) ? obj = obj[key] : obj[key] = value
         return false
       })
-
       if (result === false) {
         return reject(new DbError('KEY_NOT_FOUND', 'The specified key was not found!'))
       }

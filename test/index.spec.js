@@ -95,7 +95,13 @@ describe('Database insertion', function () {
     db.put('family.me.members', [{ name: 'Alex Soumaoro' }], true)
     .then(function () {
       assert.deepEqual(db.all(), expected)
-      done()
+      db.put('family.name', 'Soumaoro')
+      .then(function (value) {
+        assert.deepEqual(value, true)
+        expected.family.name = 'Soumaoro'
+        assert.deepEqual(db.all(), expected)
+        done()
+      })
     })
   })
 
@@ -168,5 +174,120 @@ describe('Database deletion', function () {
       assert.deepEqual(db.all(), { server: {} })
       done()
     })
+  })
+})
+
+describe('Integration tests', function () {
+  var opts = {stagingSize: 10, encryptionKey: 'alex'}
+  var db, expected
+
+  before(function () {
+    utils.deleteFolder(DB_FILE)
+  })
+
+  it('Should create and insert data in db', function (done) {
+    db = new Db(DB_FILE, opts)
+    db.put('family.name', 'Soumaoro', true)
+    .then(function (value) {
+      assert.deepEqual(value, true)
+      Promise.all([
+        db.put('family.members', ['Evance', 'Alex']),
+        db.put('config', {version: '1.2.3'})
+      ]).then(function (values) {
+        assert.deepEqual(values, [true, true])
+        assert.equal(db._log.length, 3)
+        done()
+      })
+    })
+  })
+
+  it('Should open and insert data in db with stagingSize', function (done) {
+    db = new Db(DB_FILE, opts)
+    Promise.all([
+      db.get('family.name'),
+      db.get('family.members'),
+      db.get('config')
+    ]).then(function (values) {
+      assert.equal(values[0], 'Soumaoro')
+      assert.deepEqual(values[1], ['Evance', 'Alex'])
+      assert.equal(values[2].version, '1.2.3')
+
+      var cfgs = []
+      expected = []
+      for (var i = 0; i < 10; i++) {
+        cfgs.push(db.put(`config._${i}_`, i * 3))
+        expected.push(true)
+      }
+      Promise.all(cfgs).then(function (values) {
+        assert.deepEqual(values, expected)
+        assert.equal(db._log.length, 0)
+        cfgs = []
+        expected = []
+        for (var i = 10; i < 15; i++) {
+          cfgs.push(db.put(`config._${i}_`, i * 3))
+          expected.push(true)
+        }
+        Promise.all(cfgs).then(function (values) {
+          assert.deepEqual(values, expected)
+          assert.equal(db._log.length, 5)
+          done()
+        })
+      })
+    })
+  })
+
+  it('Should open and update data in db', function (done) {
+    db = new Db(DB_FILE, opts)
+    assert.equal(db._log.length, 0)
+    Promise.all([
+      db.get('config._3_'),
+      db.get('config._7_')
+    ]).then(function (values) {
+      assert.deepEqual(values, [9, 21])
+      Promise.all([
+        db.put('family.name', 'Doe', true),
+        db.put('family.members', ['Jhone', 'Jane']),
+        db.put('config.version', '1.3.4'),
+        db.put('config.server.host', '192.8.8.12', true)
+      ]).then(function (values) {
+        assert.deepEqual(values, [true, true, true, true])
+        db.put('config.server.port', 8080).then(function (value) {
+          assert.equal(value, true)
+          done()
+        })
+      })
+    })
+  })
+
+  it('Should open and delete data in db', function (done) {
+    db = new Db(DB_FILE, opts)
+    Promise.all([
+      db.get('family.name'),
+      db.get('family.members'),
+      db.get('config.server')
+    ]).then(function (values) {
+      assert.equal(values[0], 'Doe')
+      assert.deepEqual(values[1], ['Jhone', 'Jane'])
+      assert.deepEqual(values[2], {host: '192.8.8.12', port: 8080})
+      Promise.all([
+        db.delete('family'),
+        db.delete('config.server')
+      ]).then(function (values) {
+        assert.deepEqual(values, [true, true])
+        done()
+      })
+    })
+  })
+
+  it('Should open and find db in good state', function () {
+    db = new Db(DB_FILE, opts)
+    var data = db.all()
+
+    assert.equal(db._log.length, 0)
+    assert.equal(data.family, undefined)
+    assert.equal(data.config.server, undefined)
+    assert.equal(typeof data.config, 'object')
+    assert.equal(data.config.version, '1.3.4')
+    assert.equal(Object.keys(data.config).length, 16)
   })
 })
