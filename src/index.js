@@ -61,6 +61,7 @@ const memdb = function (dbName, opts) {
     }
   }
 
+  /* put data in db using log enty */
   this._putFromLog = function (key, value, loose) {
     const path = this._extract(key)
     if (path === false) {
@@ -81,6 +82,7 @@ const memdb = function (dbName, opts) {
     })
   }
 
+  /* delete data from db using log enty */
   this._deleteFromLog = function (key) {
     const path = this._extract(key)
     if (path === false) {
@@ -97,6 +99,7 @@ const memdb = function (dbName, opts) {
     })
   }
 
+  /* replay log history on top of db */
   this._replay = function () {
     if (this._log.length === 0) {
       return true
@@ -131,6 +134,7 @@ const memdb = function (dbName, opts) {
     return status
   }
 
+  /* flush all staging data when log is full */
   this._flush = function () {
     var isOk = true
     const savedState = {_rev: this._db._rev, _log: this._log}
@@ -148,6 +152,7 @@ const memdb = function (dbName, opts) {
     return isOk
   }
 
+  /* validate and extract a keychain */
   this._extract = function (key) {
     var regex = /^(\w+)(\.\w+)*$/g
     if (!regex.test(key)) {
@@ -156,6 +161,7 @@ const memdb = function (dbName, opts) {
     return key.split('.')
   }
 
+  /* encrypt data for saving in db */
   this._encrypt = function (obj) {
     if (!this._opts.encryptionKey) {
       return JSON.stringify(obj)
@@ -164,6 +170,7 @@ const memdb = function (dbName, opts) {
     return cipher.update(JSON.stringify(obj), 'utf8', 'hex') + cipher.final('hex')
   }
 
+  /* decrypt data extracted from db */
   this._decrypt = function (str) {
     if (!this._opts.encryptionKey) {
       return JSON.parse(str)
@@ -172,24 +179,29 @@ const memdb = function (dbName, opts) {
     return JSON.parse(decipher.update(str, 'hex', 'utf8') + decipher.final('utf8'))
   }
 
+  /* return the db version */
   this.version = function () {
     return this._version
   }
 
+  /* return the db options */
   this.options = function () {
     return this._opts
   }
 
+  /* return the db revision */
   this.revision = function () {
     return this._db._rev
   }
 
+  /* return the global db abject */
   this.all = function () {
     var copy = Object.assign({}, this._db)
     delete copy._rev
     return copy
   }
 
+  /* set data in db */
   this.put = function (key, value, loose) {
     return new Promise(function (resolve, reject) {
       const path = this._extract(key)
@@ -227,6 +239,7 @@ const memdb = function (dbName, opts) {
     }.bind(this))
   }
 
+  /* get data from db */
   this.get = function (key, defaultValue) {
     return new Promise(function (resolve, reject) {
       const path = this._extract(key)
@@ -252,6 +265,7 @@ const memdb = function (dbName, opts) {
     }.bind(this))
   }
 
+  /* delete data from db */
   this.delete = function (key) {
     return new Promise(function (resolve, reject) {
       const path = this._extract(key)

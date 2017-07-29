@@ -9,7 +9,7 @@ Introduction
 ------------
 
 This lightweight engine can be used in place of things like [LevelDB](https://github.com/google/leveldb), [Redis](https://redis.io) while keeping things light and very simple.
-Internaly, memDB uses json as storage format with an opt-in support for encryption. In order to achieve performance, memdb keeps things in a staging area for fast access. No worries, every booking is handled for you :). We are developers too, thus we hate keeping tract of things.
+Internaly, memdb uses json as storage format with an opt-in support for encryption. In order to achieve performance, memdb keeps things in a staging area for fast access. No worries, all the booking is handled for you :). We are developers too, thus we hate keeping tract of things.
 
 Synopsis
 --------
@@ -28,7 +28,6 @@ Synopsis
   db.get('skywalker').then((rsp) => {
     console.log(rps) // => [Object skywalker...]
   })
-
 ```
 
 Installation
@@ -41,7 +40,7 @@ Installation
 API
 ---
 
-MemDB's API is pretty simple and straigth forward. all async action api return a promise.
+MemDB's API is pretty simple and straigth forward. Some api methods return a promise.
 
 - `version()`: Get MemDB current version
 - `revision()`: Get the current database revision
@@ -52,14 +51,14 @@ MemDB's API is pretty simple and straigth forward. all async action api return a
 - `delete(keychain)`: Delete data from the database
 
 NB: What the heck is keychain ?
-keychain is a concatenation of multiple object keys to obtain a path for acessing an object property in a deep level. This is a convenient way of puting/getting deeply nestes object properties. The folowing keychain `server.dev.host` means accessing the `host` property form `dev` object which is in turn available in the `server` object as a property.   
+keychain is a concatenation of multiple object keys to obtain a path for accessing an object property in a deep level. This is a convenient way of puting/getting deeply nested object properties. The following keychain `server.dev.host` means accessing the `host` property form `dev` object which in turn is available in the `server` object as a property.   
 
 ### Creating or Opening a database ###
 
 ``` js
   /*
-    By default, the databse is not encrypted ans the stagging 
-    operation size is 600 max of course you can move it up or down
+    By default, the databse is not encrypted and the stagging 
+    operation size limit is 600 operations; of course you can move it up or down
   */
   const db = new MemDB('db_file_path', {
       stagingSize: 600, // maximum staging operation size before flushing the data 
