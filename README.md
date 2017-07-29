@@ -34,7 +34,7 @@ Installation
 ------------
 
 ``` bash
-  $ npm install memdb
+  $ npm install evansofts-memdb
 ```
 
 API
