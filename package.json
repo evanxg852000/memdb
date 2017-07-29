@@ -1,5 +1,5 @@
 {
-  "name": "memdb",
+  "name": "evansofts-memdb",
   "description": "An in-memory database for nodejs",
   "version": "0.0.1",
   "author": "Evance Soumaoro",
