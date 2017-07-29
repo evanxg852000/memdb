@@ -1,0 +1,32 @@
+{
+  "name": "memdb",
+  "description": "An in-memory database for nodejs",
+  "version": "0.0.1",
+  "author": "Evance Soumaoro",
+  "keywords": [
+    "db",
+    "in-memory",
+    "nosql"
+  ],
+  "main": "src/index.js",
+  "repository":{
+    "type": "git",
+    "url": "git://github.com/evanxg852000/memdb.git"
+  },
+  "scripts": {
+    "lint": "standard",
+    "lint-fix": "standard --fix",
+    "test": "standard && mocha"
+  },
+  "standard": {
+    "ignore": [ ]
+  },
+  "devDependencies": {
+    "mocha": "^3.4.2",
+    "standard": "^10.0.2"
+  },
+  "engines" : { 
+    "node" : ">=0.12" 
+  },
+  "license": "Apache-2.0"
+}
