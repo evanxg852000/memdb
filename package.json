@@ -1,7 +1,7 @@
 {
   "name": "evansofts-memdb",
   "description": "An in-memory database for nodejs",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": "Evance Soumaoro",
   "keywords": [
     "db",
